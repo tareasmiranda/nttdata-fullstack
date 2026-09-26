@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const db = new sqlite3.Database('./database.sqlite');
+const db = new sqlite3.Database('./catalog.sqlite');
 
 // Create a products table if it doesn't exist
 db.run(`CREATE TABLE IF NOT EXISTS products (
