@@ -3,15 +3,6 @@ node_modules/
 server/node_modules/
 client/node_modules/
 
-# SQLite database files (sensitive)
-*.sqlite
-*.sqlite3
-*.db
-server/*.sqlite
-server/*.sqlite3
-server/*.db
-server/data/
-server/database/
 
 # Environment / secrets
 .env
