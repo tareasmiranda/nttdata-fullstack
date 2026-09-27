@@ -29,7 +29,7 @@ Resumen de los pasos que llevaron del mockup a la app final. Cada uno se validó
 
 - **IDs como números vs strings.** Catálogo originalmente posee ids con decimales, la IA para resolver esto convierte a string y el detalle no encontraba el producto, al final se optó por usar una expresión regular para quitar el decimal.
 - **`npm install:all` no instalaba `concurrently`.** La IA generó un package.json en root, para instalar todo de inmediato, pero usa un módulo llamado concurrently. El script del root sólo instalaba los hijos. Corrección: documentar `npm install` previo en el README. Deben existir soluciones más elegantes, pero no tenemos tanta experiencia con node.
-- **`allowScripts` en npm 12.** `sqlite3` y `esbuild` quedaban bloqueados silenciosamente. Corrección: `npm install-scripts approve <pkg>` dentro de cada carpeta y commitear el campo resultante, eso genera una sección para que si lo permita dentro de package.
+- **`allowScripts` en npm 12.** `sqlite3` y `esbuild` quedaban bloqueados silenciosamente porque parte de su instalacion requiere scripts. Corrección: `npm install-scripts approve <pkg>` dentro de cada carpeta y commitear el campo resultante, eso genera una sección para que si lo permita dentro de package.
 
 ## 3. Verificación (Generado con IA)
 
