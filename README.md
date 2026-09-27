@@ -42,15 +42,15 @@ El proxy de Vite en `client/vite.config.js` redirige `/api/*` a `http://localhos
 
 ```
 nttdata-fullstack/
-├── package.json          # scripts raíz: install:all, dev, build
+├── package.json
 ├── server/
-│   ├── index.js          # API Express (productos, filtros, paginación)
-│   ├── catalog.sqlite    # base de datos (no se versiona)
-│   └── images/           # opcional: imágenes locales servidas en /images
+│   ├── index.js
+│   ├── catalog.sqlite
+│   └── images/
 └── client/
-    ├── vite.config.js    # proxy /api → :3000
+    ├── vite.config.js
     └── src/
-        ├── App.jsx       # grid, filtros, paginación, estados
+        ├── App.jsx
         ├── ProductDialog.jsx
         ├── api.js
         ├── utils.js
