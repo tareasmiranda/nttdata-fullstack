@@ -5,7 +5,7 @@
 Aplicación web full stack que muestra un catálogo de supermercado de ~4.000 productos almacenados en SQLite. Permite buscar por nombre, filtrar por categoría o formato, navegar por páginas de 12 resultados y abrir el detalle de cada producto. El frontend nunca descarga el catálogo completo: la búsqueda, el filtrado y la paginación se resuelven en el backend.
 
 Stack: **React + Vite** (frontend) · **Node.js + Express** (API) · **SQLite** (base de datos `server/catalog.sqlite`, abierta en modo solo lectura).
-
+![](docs/Diagrama.png)
 ## Inicio rápido
 
 Requisitos: Node.js 20+, npm 10+ (con `allowScripts` disponible; npm 12 lo trae por defecto).
