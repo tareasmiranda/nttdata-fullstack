@@ -1,115 +1,293 @@
-# Arquitectura y decisiones
+# ARCHITECTURE.md — Product Showcase (Etapa 1)
 
-## 1. Vista general
+## 1. Overview
 
-```
-┌───────────────────────────┐         ┌──────────────────────────┐
-│  Frontend (React + Vite)  │  HTTP   │  Backend (Express)       │
-│  localhost:5173           │ ──────► │  localhost:3000          │
-│                           │  JSON   │                          │
-│  - App.jsx                │         │  - index.js              │
-│  - ProductDialog.jsx      │         │  - abre SQLite RO        │
-│  - api.js                 │         │  - resuelve filtros      │
-└───────────────────────────┘         └────────────┬─────────────┘
-                                                   │
-                                                   ▼
-                                        ┌────────────────────┐
-                                        │ catalog.sqlite     │
-                                        │ tabla products     │
-                                        └────────────────────┘
-```
+The application is a classic three‑tier web app:
 
-Tres responsabilidades bien separadas:
+- **Frontend:** React + Vite (SPA).
+- **Backend:** Node.js + Express (REST API).
+- **Database:** SQLite (file‑based, no server).
 
-- **Frontend**: composición visual, estado de la interacción, navegación entre páginas. No conoce SQL ni el esquema de la base de datos.
-- **Backend**: filtros, búsqueda, paginación, formato de la respuesta. No conoce React ni el HTML de la vitrina.
-- **Base de datos**: fuente de verdad. Se abre en modo solo-lectura; el backend nunca escribe.
+All parts run locally. The frontend and backend communicate over HTTP. The backend is the only part that talks to the database. The frontend never processes the full catalog; it requests pages, searches, and filters from the API.
 
-El contrato entre frontend y backend son cinco endpoints REST simples, descritos en `docs/SPECIFICATION.md §3`.
+## 2. Technology Choices & Rationale
 
-## 2. Por qué esta tecnología
+| Layer | Technology | Why |
+|-------|------------|-----|
+| Frontend | React + Vite | React is the most common UI library; Vite gives a fast dev server with hot reload. Both are JavaScript, so the team uses one language across the stack. |
+| Backend | Node.js + Express | Express is minimal and well documented. It lets us define API routes in a few lines. |
+| Database | SQLite | No separate server, no configuration. The entire database is a single file. Perfect for local development and small catalogs. |
+| Data seeding | Node script + `csv-parser` | Reads `data/catalog.csv` and inserts rows into SQLite. |
+| HTTP client | `fetch` (native) | No extra dependency for the frontend. |
+| Styling | Plain CSS (or a minimal framework) | Keeps the project simple and avoids build complexity. |
 
-| Capa | Elección | Motivo |
-| --- | --- | --- |
-| Frontend | **React + Vite** | Un solo lenguaje (JS) para todo el proyecto. Vite da hot-reload, proxy de `/api` y build estático sin configuración. |
-| Backend | **Node + Express** | Estándar minimalista. Los endpoints se leen de un tirón. |
-| DB | **SQLite** | Ya viene provista como `catalog.sqlite`. Sin servidor, sin configuración, sin migraciones. |
-| Lenguaje | **JavaScript** | Un solo lenguaje reduce la carga cognitiva del equipo. |
+**Why not MERN?** MongoDB requires a separate server process. SQLite is simpler and sufficient for this challenge.
 
-Descartado:
+## 3. System Components
 
-- **MongoDB / Postgres**: agregar un servidor de base de datos no aporta nada a un catálogo de 4.032 filas ya provisto como archivo.
-- **Next.js**: introduce SSR y routing que no se aprovechan; el ejercicio no pide SEO ni URLs compartibles.
-- **ORM (Prisma, Sequelize)**: una tabla y cuatro consultas `SELECT`. El ORM sería más código que el SQL que reemplaza.
+### 3.1 Frontend (React + Vite)
 
-## 3. División del backend
+**Responsibilities**
+- Render the UI.
+- Manage local UI state (search input, selected filters, current page, selected product).
+- Call the backend API with query parameters.
+- Display loading, empty, and error states.
 
-`server/index.js` tiene tres bloques:
+**Main components**
+- `App` — layout and routing (if using a router) or modal state.
+- `SearchBar` — text input, triggers search.
+- `FilterSelect` — dropdown(s) for category and format, populated from `/api/products/filters`.
+- `ProductGrid` — layout for cards.
+- `ProductCard` — image, name, price, one or two attributes.
+- `Pagination` — previous/next buttons and page indicator.
+- `ProductDetail` — modal or page showing full product info.
+- `LoadingState`, `EmptyState`, `ErrorState` — state components.
 
-1. **Apertura de la base**: `new sqlite3.Database(DB_PATH, OPEN_READONLY)`. Si el archivo no existe, el proceso sale con un mensaje explícito.
-2. **Helpers**: `all()` y `get()` envuelven el API callback de `sqlite3` en promesas, y `buildFilters()` centraliza la construcción del `WHERE` para que `GET /api/products` y el `COUNT` compartan exactamente los mismos filtros.
-3. **Rutas**: cinco endpoints, cada uno con su `try/catch` que devuelve `500` con el mensaje de error.
+**State management**
+- Simple React state (`useState`, `useEffect`).
+- No global state library needed. The URL query string can be used to persist search/filter/page (optional but recommended).
 
-La decisión clave es que **la paginación se resuelve en el backend** con `LIMIT ? OFFSET ?`, no en el frontend. El frontend nunca recibe más de 12 productos a la vez, sin importar el tamaño del catálogo.
+**API communication**
+- A small `api.js` module wraps `fetch` calls:
+  - `fetchProducts({ search, category, format, page, limit })`
+  - `fetchProductById(id)`
+  - `fetchFilters()`
 
-## 4. División del frontend
+### 3.2 Backend (Node.js + Express)
 
-- **`App.jsx`**: orquesta el estado (filtros, página, items, status) y renderiza la grilla, la toolbar y la paginación.
-- **`ProductDialog.jsx`**: modal de detalle. Usa el `<dialog>` nativo para obtener cierre con `Esc` y backdrop gratis.
-- **`api.js`**: única puerta hacia el backend. Si mañana cambia la URL base o se agrega autenticación, se toca solo aquí.
-- **`utils.js`**: helpers puros (`formatPrice`, `categoryGroup`), fáciles de testear sin montar React.
-- **`styles.css`**: proveniente del mockup, sin modificar salvo dos reglas añadidas al final para que los botones de paginación sean interactivos.
+**Responsibilities**
+- Expose the three API endpoints.
+- Parse query parameters.
+- Query SQLite.
+- Return JSON with the agreed structure.
+- Serve static files if needed (not required; Vite dev server handles frontend).
 
-## 5. Manejo de estados
+**Structure**
 
-La app tiene tres fuentes de verdad que hay que combinar:
+    server/
+    ├── index.js          # Express app, routes
+    ├── db.js             # SQLite connection and query helpers
+    ├── seed.js           # Reads CSV and populates database
+    ├── package.json
+    └── database.sqlite   # generated, gitignored
 
-- `status` ∈ {`loading`, `ready`, `error`} → resultado de la última petición.
-- `total` → cuántos productos hay en total tras aplicar filtros.
-- `items` → los productos de la página actual.
+**Routes**
+- `GET /api/products` → `getProducts(req, res)`
+- `GET /api/products/:id` → `getProductById(req, res)`
+- `GET /api/products/filters` → `getFilters(req, res)`
 
-El estado visual se deriva:
+**Data access**
+- All SQL lives in `db.js` or in the route handlers.
+- Use parameterised queries to avoid SQL injection.
+- Search: `WHERE name LIKE ?` with `%term%`.
+- Filters: `AND category = ?`, `AND format = ?`.
+- Pagination: `LIMIT ? OFFSET ?`.
+- Count total rows for pagination metadata.
 
-```
-view =
-  status === 'loading' && items.length === 0  →  'cargando'
-  status === 'error'                          →  'error'
-  status === 'ready' && total === 0           →  'vacio'
-  resto                                       →  'normal'
-```
+### 3.3 Database (SQLite)
 
-La condición `items.length === 0` en la primera rama evita que la grilla parpadee al cambiar de página: mientras haya datos previos se mantienen visibles.
+**Schema**
 
-## 6. Supuestos importantes
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      category TEXT,
+      format TEXT,
+      price REAL,
+      image TEXT
+    );
 
-1. **La base de datos no se versiona en Git** (`.gitignore` incluye `*.sqlite`). Cada persona del equipo la copia manualmente desde el paquete del desafío.
-2. **No hay autenticación** ni multiusuario. El servidor es de un solo inquilino.
-3. **La base se abre en solo-lectura.** El servidor no crea índices ni escribe nada. Si se quiere acelerar, los índices se agregan manualmente con `sqlite3` (documentado en el README).
-4. **La búsqueda es `LIKE '%q%'`**, no full-text. Para 4.032 filas es más que suficiente y evita mantener un índice FTS.
-5. **Las opciones de filtros se cargan una sola vez** al montar `App`. El catálogo es estático durante la sesión.
+(Adjust column names and types to match `data/README.md`.)
 
-## 7. Flujo de trabajo con el agente
+**Seeding**
+- `seed.js` reads `data/catalog.csv`.
+- Drops and recreates the table (for reproducibility).
+- Inserts all rows in a transaction.
+- Run with `npm run seed`.
 
-El equipo siguió la secuencia que pide la consigna:
+## 4. API Design
 
-1. El agente transformó el mockup y el PDF en `docs/SPECIFICATION.md`.
-2. El equipo revisó la spec y corrigió:
-   - El mockup mostraba un contador “de 4.032” hardcodeado; la spec exige que refleje el `total` real.
-   - El mockup tenía un conmutador “Referencia de estados” con cuatro botones; la spec mantiene solo tres estados reales (cargando / vacío / error) porque el “normal” es el caso por defecto.
-   - El mockup cargaba los 8 productos en memoria; la spec exige paginación server-side.
-3. El agente propuso la arquitectura de `docs/ARCHITECTURE.md`.
-4. La implementación se autorizó en pasos pequeños:
-   - Setup + primeros endpoints.
-   - Grilla que consume la API real.
-   - Búsqueda y filtros en el backend.
-   - Paginación.
-   - Estados de UI.
-   - Diálogo de detalle.
-5. La verificación final está en `docs/VERIFICATION.md`.
+### 4.1 `GET /api/products`
 
-Correcciones pedidas al agente durante el desarrollo:
+**Query parameters**
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| search | string | — | Partial match on name (case‑insensitive). |
+| category | string | — | Exact match on category. |
+| format | string | — | Exact match on format. |
+| page | integer | 1 | Page number (1‑based). |
+| limit | integer | 20 | Items per page. |
 
-- Los campos `id`, `price` y `originalPrice` son `INTEGER`/`REAL` en el esquema provisto, no `TEXT`. El agente había asumido `TEXT` en la primera iteración; se corrigió el casteo en el frontend (`String(product.id)`) y en la ruta `/api/products/:id` (`Number(req.params.id)`).
-- El mockup usaba `1 2 3 … 504` como paginación estática. Se pidió reemplazarla por paginación real calculada desde `totalPages`.
-- El agente propuso originalmente cargar todo el catálogo y filtrar en el cliente. Se pidió rehacerlo para que el backend resuelva todo, tal como exige la consigna.
-- El estado “Sin resultados” se mostraba mientras se cargaba. Se corrigió para mostrar el spinner hasta tener una respuesta.
+**Response 200**
+
+    {
+      "data": [
+        {
+          "id": 1,
+          "name": "Leche entera 1 L",
+          "price": 1200,
+          "image": "/assets/leche.jpg",
+          "category": "Lácteos",
+          "format": "1 L"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 20,
+        "total": 4032,
+        "totalPages": 202
+      }
+    }
+
+### 4.2 `GET /api/products/:id`
+
+**Response 200**
+
+    {
+      "id": 1,
+      "name": "Leche entera 1 L",
+      "description": "Leche entera de vaca, 1 litro.",
+      "category": "Lácteos",
+      "format": "1 L",
+      "price": 1200,
+      "image": "/assets/leche.jpg"
+    }
+
+**Response 404**
+
+    { "error": "Product not found" }
+
+### 4.3 `GET /api/products/filters`
+
+**Response 200**
+
+    {
+      "categories": ["Aceites", "Arroz", "Lácteos", "..."],
+      "formats": ["1 L", "500 g", "Pack 6", "..."]
+    }
+
+## 5. Data Flow
+
+1. User types a search term or selects a filter.
+2. Frontend updates its state and calls `GET /api/products?search=...&category=...&page=1`.
+3. Backend receives the request, builds a SQL query with `WHERE` and `LIMIT/OFFSET`.
+4. SQLite returns the matching rows and total count.
+5. Backend formats the response and sends JSON.
+6. Frontend receives the page of products and renders cards.
+7. User clicks a card → frontend calls `GET /api/products/:id` → detail view opens.
+
+**Pagination flow**
+- User clicks "Next" → frontend increments `page` → new API call → grid updates.
+
+**Filter options flow**
+- On mount, frontend calls `GET /api/products/filters` → populates dropdowns.
+
+## 6. Directory Structure
+
+    mi-tienda/
+    ├── AGENTS.md
+    ├── ARCHITECTURE.md
+    ├── SPEC.md
+    ├── README.md
+    ├── .gitignore
+    ├── data/
+    │   ├── catalog.csv
+    │   └── README.md
+    ├── server/
+    │   ├── index.js
+    │   ├── db.js
+    │   ├── seed.js
+    │   └── package.json
+    ├── client/
+    │   ├── index.html
+    │   ├── src/
+    │   │   ├── main.jsx
+    │   │   ├── App.jsx
+    │   │   ├── api.js
+    │   │   └── components/
+    │   │       ├── SearchBar.jsx
+    │   │       ├── FilterSelect.jsx
+    │   │       ├── ProductGrid.jsx
+    │   │       ├── ProductCard.jsx
+    │   │       ├── Pagination.jsx
+    │   │       ├── ProductDetail.jsx
+    │   │       └── states/
+    │   │           ├── LoadingState.jsx
+    │   │           ├── EmptyState.jsx
+    │   │           └── ErrorState.jsx
+    │   └── package.json
+    └── scripts/
+        └── verify-api.sh
+
+## 7. Local Execution
+
+### Prerequisites
+- Node.js 18+ and npm.
+
+### Steps
+1. **Install backend dependencies**
+
+       cd server
+       npm install
+
+2. **Seed the database**
+
+       npm run seed
+
+   This reads `../data/catalog.csv` and creates `server/database.sqlite`.
+
+3. **Start the backend**
+
+       npm run dev
+
+   API available at `http://localhost:3000`.
+
+4. **Install frontend dependencies**
+
+       cd ../client
+       npm install
+
+5. **Start the frontend**
+
+       npm run dev
+
+   App available at `http://localhost:5173`.
+
+### Verification
+- Run `scripts/verify-api.sh` (or `npm run verify` in `server/`) to check the three endpoints.
+- Manually test search, filters, pagination, and detail view in the browser.
+- Simulate error by stopping the backend and reloading the frontend.
+
+## 8. Verification Strategy
+
+| What | How |
+|------|-----|
+| API returns products | `curl http://localhost:3000/api/products?limit=2` |
+| Search works | `curl "http://localhost:3000/api/products?search=leche"` |
+| Filter works | `curl "http://localhost:3000/api/products?category=Lácteos"` |
+| Pagination works | `curl "http://localhost:3000/api/products?page=2&limit=10"` |
+| Filters endpoint | `curl http://localhost:3000/api/products/filters` |
+| Detail endpoint | `curl http://localhost:3000/api/products/1` |
+| Frontend states | Manually trigger loading, empty, error in the UI. |
+| No invented fields | Review the UI against the CSV columns. |
+
+A script `scripts/verify-api.sh` automates the curl checks and asserts the JSON structure.
+
+## 9. Risks & Mitigations
+
+| Risk | Mitigation |
+|------|------------|
+| CSV column names differ from assumptions | Read `data/README.md` first and adjust schema/seed. |
+| Large catalog slows queries | SQLite handles 4k rows easily; add indexes on `name`, `category`, `format` if needed. |
+| Frontend performs filtering locally | Enforce in code review and AGENTS.md: backend does search/filter/pagination. |
+| Invented fields | Strictly map UI to CSV columns; no defaults. |
+| Agent edits files manually | AGENTS.md forbids manual edits; all changes via agent. |
+
+## 10. Future Extensions (out of scope for Etapa 1)
+
+- Shopping cart and checkout.
+- User authentication.
+- Admin panel for product management.
+- More filters (brand, price range).
+- Server‑side rendering (Next.js) if SEO becomes important.
