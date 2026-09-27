@@ -24,7 +24,7 @@ Con eso quedan disponibles:
 - Frontend: http://localhost:5173
 - API: http://localhost:3000/api/products
 
-### Arrancar por separado (si preferís no usar `concurrently`)
+### Arranque por separado
 
 ```bash
 # Terminal 1
