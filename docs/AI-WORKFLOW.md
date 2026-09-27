@@ -20,7 +20,7 @@ Resumen de los pasos que llevaron del mockup a la app final. Cada uno se validó
 | 1 | Convertir el mockup a React, manteniendo el HTML y el CSS originales. | Que la UI se viera igual al mockup al abrir `:5173`. |
 | 2 | Reemplazar el array hardcodeado por un `fetch` a `/api/products`. | Que en DevTools → Network apareciera la petición a `:3000` y que la grilla se poblara. |
 | 3 | Implementar el backend Express contra `catalog.sqlite` (originalmente seed, con create table). | Que `sqlite3 server/catalog.sqlite "SELECT COUNT(*) FROM products;"` diera el número esperado y `GET /api/products` devolviera filas reales. |
-| 4 | Mover búsqueda, filtros y paginación al servidor. | Que cada click de paginación hiciera una sola petición con `page` y `pageSize`, no un `SELECT *`. |
+| 4 | Mover paginación al servidor, evitando que el cliente cargue todo. | Que cada click de paginación hiciera una sola petición con `page` y `pageSize`, no un `SELECT *`. |
 | 5 | Agregar `GET /api/products/filters` para poblar los `<select>`. | Que las opciones coincidieran con `SELECT DISTINCT` de la base. |
 | 6 | Quitar el conmutador "Referencia de estados" del mockup. | Que la UI no mostrara más los botones de demo y que los tres estados aparecieran por condiciones reales (red lenta, búsqueda sin resultados, servidor caído). |
 | 7 | Paginación real de 3 filas × 4 columnas. | Que en pantalla hubiera 12 páginas, que "Siguiente" avanzara al grupo correcto y que el contador dijera "Mostrando 13-24 de N". |
