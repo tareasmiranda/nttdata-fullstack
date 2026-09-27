@@ -1,6 +1,6 @@
 # Especificación — Vitrina de productos
 
-Documento revisado de comportamientos que la aplicación debe cumplir. Escrito a partir del mockup (`mockup/index.html`) y de la consigna de la Etapa 1, y ajustado iterativamente durante el desarrollo.
+Documento revisado de comportamientos que la aplicación debe cumplir. Escrito a partir del mockup (`mockup/index.html`)
 
 ## 1. Objetivo
 
@@ -9,24 +9,19 @@ Permitir que una persona explore un catálogo de supermercado de aproximadamente
 ## 2. Alcance
 
 **Dentro:**
-- Vitrina en cards con imagen, nombre, categoría, formato y precio.
+- Vitrina en páginas, con imagen, nombre, categoría, formato y precio.
 - Búsqueda por nombre.
 - Filtro por categoría y por formato.
 - Paginación de 12 productos por página (4 columnas × 3 filas en escritorio).
 - Detalle de producto en un diálogo modal.
-- Estados explícitos: cargando, sin resultados, error.
-
-**Fuera (no forma parte de esta etapa):**
-- Carrito, checkout, pagos.
-- Administración de productos (alta, baja, modificación).
-- Autenticación de usuarios.
+- Estados: cargando, sin resultados, error.
 
 ## 3. Comportamientos esperados
 
 ### 3.1 Listado de productos
 
 - Al abrir la aplicación, se muestran los primeros 12 productos del catálogo ordenados por nombre.
-- Cada card muestra: imagen (`imageUrl`), ID (`#<id>`), categoría raíz (parte antes de ` > `), nombre, formato y precio formateado en CLP.
+- Cada card muestra: imagen (`imageUrl`), ID (`#<id>`), categoría raíz (parte antes de ` > `), nombre, formato y precio formateado en CLP (ya viene en CLP pero con decimales).
 - La grilla ocupa 4 columnas en escritorio, 2 en tablet y 2 en móvil.
 
 ### 3.2 Búsqueda
@@ -64,11 +59,10 @@ Permitir que una persona explore un catálogo de supermercado de aproximadamente
 | Error | La petición falla (red, 500, timeout). Se ofrece botón "Reintentar". |
 | Normal | Hay al menos un resultado para la página actual. |
 
-Los estados se distinguen visualmente. El estado "sin resultados" ofrece un botón "Limpiar filtros"; el estado "error" ofrece "Reintentar".
-
 ## 4. Contrato de la API
 
-La búsqueda, los filtros y la paginación **deben** resolverse en el backend. El frontend nunca descarga el catálogo completo.
+La búsqueda, los filtros y la paginación **deben** resolverse en el backend. El frontend no debería descargar todo.
+Claro que con el tamaño se puede y no demora mucho, pero no es ideal si se despliega hacia varios usuarios.
 
 ### `GET /api/products`
 
@@ -106,14 +100,6 @@ Respuesta:
 
 ## 5. Fuente de datos
 
-- Base SQLite `server/catalog.sqlite`, abierta en modo `OPEN_READONLY`.
+- Base SQLite `server/catalog.sqlite`.
 - Tabla `products` con columnas: `id` (INTEGER PK), `name`, `description`, `format`, `category`, `price` (REAL), `priceUnit`, `originalPrice` (REAL), `currency`, `imageUrl`, `productUrl`, `extractedAt`.
-- No se completan campos con valores inventados: si `imageUrl` está vacío o falla, se muestra un placeholder genérico.
-
-## 6. Criterios de aceptación
-
-1. Cambiar de página no descarga el catálogo completo: en DevTools → Network, cada click de paginación hace una petición `GET /api/products?page=N&pageSize=12` cuya respuesta pesa unos pocos KB.
-2. Buscar "mayonesa" y luego filtrar por "Aceite, especias y salsas" devuelve la intersección, no la unión.
-3. Navegar a una búsqueda sin resultados muestra el estado "sin resultados" (no una grilla vacía).
-4. Detener el servidor y recargar el frontend muestra el estado "error" con botón "Reintentar".
-5. Abrir el detalle de un producto muestra todos los campos de la tabla, incluyendo `productUrl` como enlace.
+- No se completan campos con valores inventados: si `imageUrl` está vacío o falla, se muestra un placeholder genérico (Que hasta ahora no ha pasado).
