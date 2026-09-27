@@ -13,20 +13,17 @@ Requisitos: **Node.js ≥ 20** y **npm ≥ 10** (probado con npm 12). No se nece
 git clone https://github.com/USERNAME/my-shop.git
 cd my-shop
 
-# 2. Copiar la base de datos del catálogo
-cp /ruta/a/catalog.sqlite server/catalog.sqlite
-
-# 3. Instalar dependencias del proyecto raíz (concurrently, etc.)
+# 2. Instalar dependencias del proyecto raíz (concurrently, etc.)
 npm install
 
-# 4. Instalar dependencias del servidor y del cliente
+# 3. Instalar dependencias del servidor y del cliente
 npm run install:all
 
-# 5. Aprobar scripts nativos (una sola vez, npm 12+)
+# 4. Aprobar scripts nativos (una sola vez, npm 12+)
 cd server && npm install-scripts approve sqlite3 && npm install && cd ..
 cd client && npm install-scripts approve esbuild  && npm install && cd ..
 
-# 6. Arrancar backend + frontend con un solo comando
+# 5. Arrancar backend + frontend con un solo comando
 npm run dev
 ```
 
