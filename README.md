@@ -69,4 +69,4 @@ nttdata-fullstack/
 
 ## Verificación
 
-Vease [AI-WORKFLOW.md @ Verificación](https://github.com/tareasmiranda/nttdata-fullstack/blob/main/docs/AI-WORKFLOW.md#Verificación)
+Vease [AI-WORKFLOW.md @ Verificación](https://github.com/tareasmiranda/nttdata-fullstack/blob/main/docs/AI-WORKFLOW.md#3)
