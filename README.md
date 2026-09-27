@@ -65,10 +65,6 @@ nttdata-fullstack/
 | GET | `/api/products/by-ids?ids=1,2,3` | Productos por lista de IDs (usado internamente para el detalle cacheado). |
 | GET | `/api/health` | Healthcheck. |
 
-## Qué NO incluye
-
-Por consigna de la Etapa 1: carrito, checkout, pagos y administración de productos quedan fuera del alcance.
-
 ## Verificación
 
-Ver [AI-WORKFLOW.md § Verificación](https://github.com/xxxxxx/xxxxxx/blob/main/AI-WORKFLOW.md#verificación) para los comandos reproducibles que confirman que la API cumple lo pedido.
+Ver [AI-WORKFLOW.md § Verificación](https://github.com/tareasmiranda/ntt-fullstack/blob/main/docs/AI-WORKFLOW.md#verificación) para los comandos reproducibles que confirman que la API cumple lo pedido.
