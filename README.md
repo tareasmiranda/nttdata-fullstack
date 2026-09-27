@@ -67,4 +67,4 @@ nttdata-fullstack/
 
 ## Verificación
 
-Ver [AI-WORKFLOW.md § Verificación](https://github.com/tareasmiranda/ntt-fullstack/blob/main/docs/AI-WORKFLOW.md#verificación) para los comandos reproducibles que confirman que la API cumple lo pedido.
+Ver [AI-WORKFLOW.md § Verificación](https://github.com/tareasmiranda/nttdata-fullstack/blob/main/docs/AI-WORKFLOW.md#verificación) para los comandos reproducibles que confirman que la API cumple lo pedido.
