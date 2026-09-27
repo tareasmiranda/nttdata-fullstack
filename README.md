@@ -1,6 +1,6 @@
 # PASO — Vitrina de productos
 
-[Especificación](https://github.com/USERNAME/tareasmiranda/nttdata-fullstack/main/docs/SPECIFICATION.md) | [Arquitectura](https://github.com/tareasmiranda/nttdata-fullstack/main/docs/ARCHITECTURE.md) | [Verificación](https://github.com/tareasmiranda/nttdata-fullstack/blob/main/docs/VERIFICATION.md) | [AGENTS.md](https://github.com/tareasmiranda/nttdata-fullstack/blob/main/AGENTS.md)
+[Especificación](https://github.com/USERNAME/tareasmiranda/nttdata-fullstack/main/docs/SPECIFICATION.md) | [Arquitectura](https://github.com/tareasmiranda/nttdata-fullstack/main/docs/ARCHITECTURE.md) | [Verificación](https://github.com/tareasmiranda/nttdata-fullstack/blob/main/docs/VERIFICATION.md) | [SPEC.md](https://github.com/tareasmiranda/nttdata-fullstack/blob/main/SPEC.md)
 
 Aplicación Full Stack que expone el catálogo de supermercado (4.032 productos) del Desafío Full Stack — Etapa 1. El backend lee `catalog.sqlite`, resuelve búsqueda, filtros y paginación, y el frontend consume esa API mostrando una vitrina de cards paginada.
 
