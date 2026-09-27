@@ -4,8 +4,6 @@
 
 Aplicación Full Stack que expone el catálogo de supermercado (4.032 productos) del Desafío Full Stack — Etapa 1. El backend lee `catalog.sqlite`, resuelve búsqueda, filtros y paginación, y el frontend consume esa API mostrando una vitrina de cards paginada.
 
-> **Repositorio:** reemplace `USERNAME/my-shop` en los enlaces de arriba por su usuario y nombre de repositorio reales.
-
 ## Inicio rápido
 
 Requisitos: **Node.js ≥ 20** y **npm ≥ 10** (probado con npm 12). No se necesita instalar SQLite por separado.
@@ -120,8 +118,8 @@ Esta es la correspondencia entre lo que pide la consigna y dónde encontrarlo:
 | 1. Aplicación y ejecución | Este README + `server/` + `client/` |
 | 2. Especificación | [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md) |
 | 3. Arquitectura y decisiones | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
-| 4. Arnés básico | [`AGENTS.md`](AGENTS.md) + [`docs/VERIFICATION.md`](docs/VERIFICATION.md) |
+| 4. Arnés básico | [`SPEC.md`](SPEC.md) + [`docs/VERIFICATION.md`](docs/VERIFICATION.md) |
 
 ## Uso del agente
 
-Todos los cambios en el código fueron realizados por un agente de IA guiado por las instrucciones persistentes de [`AGENTS.md`](AGENTS.md). Las decisiones y revisiones humanas se documentan en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) y [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md).
+Todos los cambios en el código fueron realizados por un agente de IA guiado por las instrucciones persistentes de [`SPEC.md`](SPEC.md). Las decisiones y revisiones humanas se documentan en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) y [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md).
